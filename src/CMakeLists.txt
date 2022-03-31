@@ -1,0 +1,13 @@
+﻿target_sources (${CMAKE_PROJECT_NAME} PRIVATE "main.cpp"
+                                              "SetCalculator.cpp"
+                                              "Set.cpp"
+                                              "NameGenerator.cpp"
+                                              "Operation.cpp"
+                                              "Identity.cpp"
+                                              "BinaryOperation.cpp"
+                                              "NonCompBinaryOperation.cpp"
+                                              "Union.cpp"
+                                              "Intersection.cpp"
+                                              "Difference.cpp"
+                                              "Product.cpp"
+                                              "Comp.cpp")
