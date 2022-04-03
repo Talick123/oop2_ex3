@@ -9,6 +9,7 @@
 
 #include <istream>
 #include <ostream>
+#include <fstream>
 #include <sstream>
 #include <algorithm>
 
@@ -21,14 +22,27 @@ SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
 
 void SetCalculator::run()
 {
+    readMaxOperations();
+    //TASK: ask user for max number of operations (check between 3 and 100) and takin
     do
     {
         m_ostr << '\n';
         printOperations();
         m_ostr << "Enter command ('help' for the list of available commands): ";
+        //TASK: try block for reading action
         const auto action = readAction();
         runAction(action);
     } while (m_running);
+}
+
+void SetCalculator::read()
+{
+    std::ifstream myfile;
+    std::string path;
+    m_ostr << "Please enter file path: ";
+    m_istr >> path;
+    myfile.open(path);
+    
 }
 
 void SetCalculator::eval()
@@ -82,13 +96,14 @@ void SetCalculator::printOperations() const
         m_ostr << '\n';
     }
     m_ostr << '\n';
+    m_ostr << "Maximum number of operations allowed: " << m_maxOperations << '\n';
 }
 
 std::optional<int> SetCalculator::readOperationIndex() const
 {
     auto i = 0;
     m_istr >> i;
-    if (i >= m_operations.size())
+    if (i >= m_operations.size()) //TASK: add to exceptions
     {
         m_ostr << "Operation #" << i << " doesn't exist\n";
         return {};
@@ -121,7 +136,8 @@ void SetCalculator::runAction(Action action)
         case Action::Invalid:
             m_ostr << "Command not found\n";
             break;
-
+    
+        case Action::Read:         read();                     break;   
         case Action::Eval:         eval();                     break;
         case Action::Union:        binaryFunc<Union>();        break;
         case Action::Intersection: binaryFunc<Intersection>(); break;
@@ -201,4 +217,29 @@ SetCalculator::OperationList SetCalculator::createOperations()
         std::make_shared<Intersection>(std::make_shared<Identity>(), std::make_shared<Identity>()),
         std::make_shared<Difference>(std::make_shared<Identity>(), std::make_shared<Identity>())
     };
+}
+
+void SetCalculator::readMaxOperations()
+{
+    int max;
+    m_ostr << "Please enter maximum number of operations: ";
+    m_istr >> max;
+
+    try {
+        setMaxOperations(max);
+    }
+    catch(...)
+    {
+        //TASK: print error and ask to enter number again
+    }
+}
+
+void SetCalculator::setMaxOperations(int max)
+{
+    if (max > 100 || max < 3)
+    {
+        //throw
+    } 
+
+    m_maxOperations = max;
 }

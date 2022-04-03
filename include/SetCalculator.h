@@ -15,6 +15,7 @@ public:
     void run();
 
 private:
+    void read();
     void eval();
     void del();
     void help();
@@ -33,6 +34,7 @@ private:
 
     enum class Action
     {
+        Read,
         Invalid,
         Eval,
         Union,
@@ -67,4 +69,10 @@ private:
 
     static ActionMap createActions();
     static OperationList createOperations();
+    
+    //New:
+    int m_maxOperations;
+    void readMaxOperations();
+    void setMaxOperations(int max);
+
 };
