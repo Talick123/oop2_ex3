@@ -13,6 +13,7 @@ class SetCalculator
 public:
     SetCalculator(std::istream& istr, std::ostream& ostr);
     void run();
+    void start();
 
 private:
     void read();
@@ -34,8 +35,8 @@ private:
 
     enum class Action
     {
-        Read,
         Invalid,
+        Read,
         Eval,
         Union,
         Intersection,

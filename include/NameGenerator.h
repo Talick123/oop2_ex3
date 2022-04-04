@@ -15,3 +15,5 @@ public:
 private:
     char m_current = 'A';
 };
+
+//TODO: make better
