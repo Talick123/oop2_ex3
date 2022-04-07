@@ -47,7 +47,7 @@ void SetCalculator::read()
 
 void SetCalculator::eval()
 {
-    if (auto index = readOperationIndex(); index)
+    if (auto index = readOperationIndex(); index) //R: init ; condition
     {
         const auto& operation = m_operations[*index];
         auto inputs = std::vector<Set>();
@@ -154,6 +154,7 @@ SetCalculator::ActionMap SetCalculator::createActions()
 {
     return ActionMap
     {
+        //TASK: add here: 'read' 'resize'
         {
             "eval",
             "(uate) num ... - compute the result of function #num on the "

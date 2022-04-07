@@ -14,5 +14,5 @@ void Identity::print(std::ostream& ostr, NameGenerator& gen) const
 
 void Identity::print(std::ostream& ostr, const std::vector<Set>& inputs) const
 {
-    ostr << inputs.front();
+    ostr << inputs.front(); //R: first element
 }
