@@ -20,10 +20,15 @@ SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
 {
 }
 
+void SetCalculator::start()
+{
+    //TASK: ask user for max number of operations (check between 3 and 100) and takin
+    readMaxOperations();
+    run();
+}
+
 void SetCalculator::run()
 {
-    readMaxOperations();
-    //TASK: ask user for max number of operations (check between 3 and 100) and takin
     do
     {
         m_ostr << '\n';
@@ -32,7 +37,7 @@ void SetCalculator::run()
         //TASK: try block for reading action
         const auto action = readAction();
         runAction(action);
-    } while (m_running);
+    } while (m_running && m_istr);
 }
 
 void SetCalculator::read()
@@ -41,8 +46,17 @@ void SetCalculator::read()
     std::string path;
     m_ostr << "Please enter file path: ";
     m_istr >> path;
-    myfile.open(path);
-    
+    myfile.open(path); //TASK: exception
+    auto fileCalc = SetCalculator(myfile, m_ostr);
+
+    fileCalc.m_operations = this->m_operations; //TODO: check
+
+    while (!myfile.eof())
+    {
+        fileCalc.run();
+    }
+
+    this->m_operations = fileCalc.m_operations;
 }
 
 void SetCalculator::eval()
@@ -155,6 +169,12 @@ SetCalculator::ActionMap SetCalculator::createActions()
     return ActionMap
     {
         //TASK: add here: 'read' 'resize'
+        {
+            "read",
+            " SOMETHING "
+            " SOMETHING ",
+            Action::Read
+        },
         {
             "eval",
             "(uate) num ... - compute the result of function #num on the "
