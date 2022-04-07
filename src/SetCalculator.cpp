@@ -54,9 +54,7 @@ void SetCalculator::readline()
     
 
     std::getline(m_istr, line);
-    if (!line.size())
-        m_ostr << "notlinebro\n";
-    //m_ostr << "line: " << line << "\n";
+   
     m_line.str(line);
 }
 
@@ -65,11 +63,17 @@ void SetCalculator::read()
     std::ifstream myfile;
     std::string path;
     m_ostr << "Please enter file path: ";
-    m_istr >> path;
+    
+    //m_istr >> path;
+    std::getline(m_istr, path);
+    m_line << path;
     myfile.open(path); //TASK: exception
+    if (!myfile)
+        m_ostr << "not file";
     auto fileCalc = SetCalculator(myfile, m_ostr);
 
     fileCalc.m_operations = this->m_operations;
+    fileCalc.m_maxOperations = this->m_maxOperations;
 
     while (!myfile.eof())
     {
@@ -77,6 +81,8 @@ void SetCalculator::read()
     }
 
     this->m_operations = fileCalc.m_operations;
+    this->m_maxOperations = fileCalc.m_maxOperations;
+
 }
 
 void SetCalculator::eval()
