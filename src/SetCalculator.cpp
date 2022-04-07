@@ -49,7 +49,7 @@ void SetCalculator::read()
     myfile.open(path); //TASK: exception
     auto fileCalc = SetCalculator(myfile, m_ostr);
 
-    fileCalc.m_operations = this->m_operations; //TODO: check
+    fileCalc.m_operations = this->m_operations;
 
     while (!myfile.eof())
     {
