@@ -6,6 +6,8 @@
 #include <iosfwd>
 #include <optional>
 
+#include <sstream>
+
 class Operation;
 
 class SetCalculator
@@ -64,8 +66,8 @@ private:
     std::istream& m_istr;
     std::ostream& m_ostr;
 
-    std::optional<int> readOperationIndex() const;
-    Action readAction() const;
+    std::optional<int> readOperationIndex();
+    Action readAction();
     void runAction(Action action);
 
     static ActionMap createActions();
@@ -75,5 +77,10 @@ private:
     int m_maxOperations;
     void readMaxOperations();
     void setMaxOperations(int max);
+    void readline();
+
+
+
+    std::stringstream m_line;
 
 };

@@ -16,7 +16,9 @@
 namespace rng = std::ranges;
 
 SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
-    : m_actions(createActions()), m_operations(createOperations()), m_istr(istr), m_ostr(ostr)
+    : m_actions(createActions()),
+    m_operations(createOperations()), m_istr(istr), m_ostr(ostr)
+  
 {
 }
 
@@ -24,6 +26,7 @@ void SetCalculator::start()
 {
     //TASK: ask user for max number of operations (check between 3 and 100) and takin
     readMaxOperations();
+    m_istr.ignore();
     run();
 }
 
@@ -35,9 +38,26 @@ void SetCalculator::run()
         printOperations();
         m_ostr << "Enter command ('help' for the list of available commands): ";
         //TASK: try block for reading action
+        m_line.clear(); 
+        readline();
+        
         const auto action = readAction();
         runAction(action);
     } while (m_running && m_istr);
+}
+
+void SetCalculator::readline()
+{
+    auto line = std::string();
+    m_line.clear();
+
+    
+
+    std::getline(m_istr, line);
+    if (!line.size())
+        m_ostr << "notlinebro\n";
+    //m_ostr << "line: " << line << "\n";
+    m_line.str(line);
 }
 
 void SetCalculator::read()
@@ -49,7 +69,7 @@ void SetCalculator::read()
     myfile.open(path); //TASK: exception
     auto fileCalc = SetCalculator(myfile, m_ostr);
 
-    fileCalc.m_operations = this->m_operations; //TODO: check
+    fileCalc.m_operations = this->m_operations;
 
     while (!myfile.eof())
     {
@@ -113,10 +133,13 @@ void SetCalculator::printOperations() const
     m_ostr << "Maximum number of operations allowed: " << m_maxOperations << '\n';
 }
 
-std::optional<int> SetCalculator::readOperationIndex() const
+std::optional<int> SetCalculator::readOperationIndex() 
 {
     auto i = 0;
-    m_istr >> i;
+    m_line >> i;
+
+    m_ostr << "readOperationIndex: i = " << i << "\n";
+    //m_istr >> i;
     if (i >= m_operations.size()) //TASK: add to exceptions
     {
         m_ostr << "Operation #" << i << " doesn't exist\n";
@@ -125,11 +148,13 @@ std::optional<int> SetCalculator::readOperationIndex() const
     return i;
 }
 
-SetCalculator::Action SetCalculator::readAction() const
+SetCalculator::Action SetCalculator::readAction()
 {
     auto action = std::string();
-    m_istr >> action;
 
+    m_line >> action;
+
+    m_ostr << "readACtion: action = " << action << "\n";
     const auto i = std::ranges::find(m_actions, action, &ActionDetails::command);
     if (i != m_actions.end())
     {
@@ -172,7 +197,7 @@ SetCalculator::ActionMap SetCalculator::createActions()
         {
             "read",
             " SOMETHING "
-            " SOMETHING ",
+            " SOMETHING ELSE",
             Action::Read
         },
         {
