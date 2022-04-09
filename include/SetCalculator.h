@@ -7,6 +7,7 @@
 #include <optional>
 
 #include <sstream>
+#include <exception>
 
 class Operation;
 
@@ -54,6 +55,7 @@ private:
     {
         std::string command;
         std::string description;
+        int numOfArguments; //Tali: maybe change this to unsigned int
         Action action;
     };
 
@@ -67,6 +69,7 @@ private:
     std::ostream& m_ostr;
 
     std::optional<int> readOperationIndex();
+    std::vector<int> getIndexes(int numOfArguments);
     Action readAction();
     void runAction(Action action);
 
@@ -77,10 +80,14 @@ private:
     int m_maxOperations;
     void readMaxOperations();
     void setMaxOperations(int max);
-    void readline();
+    //void readline(); //maybe delete
+    std::vector<int> readArguments(int numOfArguments);
+
+    int readInt();
+    std::string readString();
 
 
 
-    std::stringstream m_line;
+    //std::stringstream m_line;
 
 };
