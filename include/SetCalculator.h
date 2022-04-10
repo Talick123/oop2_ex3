@@ -19,6 +19,7 @@ public:
     void start();
 
 private:
+    void resize();
     void read();
     void eval();
     void del();
@@ -28,8 +29,9 @@ private:
     template <typename FuncType>
     void binaryFunc()
     {
-        if (m_operations.size() >= max)
-            throw std::out_of_range("You've reached the max number of operations!\n");
+       //Noga: I dont know why this is here. 
+       /* if (m_operations.size() >= max)
+            throw std::out_of_range("You've reached the max number of operations!\n");*/
 
         auto indexes = getIndexes(2);
         
@@ -42,6 +44,7 @@ private:
     enum class Action
     {
         Invalid,
+        Resize,
         Read,
         Eval,
         Union,
@@ -91,4 +94,8 @@ private:
     int readNumOfWords(std::string line);
 
     bool m_fileMode = false;
+
+    bool checkToContinueRead()const;
+    void checkValidMaxOperation(int max);
+    void copyCalculatorData(SetCalculator &to, SetCalculator& from);
 };

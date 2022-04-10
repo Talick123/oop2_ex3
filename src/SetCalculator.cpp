@@ -40,24 +40,26 @@ void SetCalculator::run()
         m_ostr << '\n';
         printOperations();
         m_ostr << "Enter command ('help' for the list of available commands): ";
-        try {
-
+        try 
+        {
             const auto action = readAction();
             runAction(action);
         }
         catch (std::istream::failure& error)
         {
             m_ostr << "invalid input\n";
-            //TODO: IF IN READING MODE, ASK IF TO CONTINUE
+            if(m_fileMode) throw;
         }
         catch (std::invalid_argument& error)
         {
             m_ostr << error.what();
             m_istr.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            if (m_fileMode) throw;
         }
-       catch (std::out_of_range& error)
+        catch (std::out_of_range& error)
         {
             m_ostr << error.what();
+            if (m_fileMode) throw;
         }
 
     } while (m_running && m_istr);
@@ -65,6 +67,11 @@ void SetCalculator::run()
 
 //----------------------------------------------------------------------------------
 
+
+void SetCalculator::resize()
+{
+    readMaxOperations();
+}
 
 void SetCalculator::read()
 {
@@ -77,27 +84,47 @@ void SetCalculator::read()
 
         auto fileCalc = SetCalculator(myfile, m_ostr);
 
-        fileCalc.m_operations = this->m_operations;
-        fileCalc.m_maxOperations = this->m_maxOperations;
+        copyCalculatorData(fileCalc, *this);
         
-        m_fileMode = true;
+        
+        fileCalc.m_fileMode = true;
 
         while (!myfile.eof() && fileCalc.m_running) //TODO: ADD myfile.m_running
         {
-            fileCalc.run();
+            try
+            {
+                fileCalc.run();
+            }
+            catch (...)
+            {
+                /*std::string line;
+                myfile.seekg(0);
+                std::getline(myfile, line);*/
+
+                //noga: no. always print the first line in file
+                //m_ostr << "\nThe problem was this line: " << line << "\n";
+                //Noga: i think to move this ugly part to different function
+                //Noga: now I think that its stupid to make function that we need to use only in file mode so I dont Know
+                //Noga: eventually i moved it to new function but i dont know ok. ok
+                if (checkToContinueRead())
+                    continue;
+                else
+                    break;
+                
+            }
         }
 
-        m_fileMode = false;
+        //fileCalc.m_fileMode = false;
 
+        copyCalculatorData(*this, fileCalc);
 
-        this->m_operations = fileCalc.m_operations;
-        this->m_maxOperations = fileCalc.m_maxOperations;
 
     }
     catch (InvalidPath &error)
     {
         m_ostr << error.what();
     }
+    
     myfile.close();
 }
 
@@ -217,7 +244,8 @@ void SetCalculator::runAction(Action action)
             throw std::invalid_argument("Command not found\n");
             break;
     
-        case Action::Read:         read();                     break;   
+        case Action::Resize:       resize();                     break;
+        case Action::Read:         read();                     break;
         case Action::Eval:         eval();                     break;
         case Action::Union:        binaryFunc<Union>();        break;
         case Action::Intersection: binaryFunc<Intersection>(); break;
@@ -238,9 +266,16 @@ SetCalculator::ActionMap SetCalculator::createActions()
     {
         //TASK: add here: 'read' 'resize'
         {
+            "resize",
+            " SOMETHING resize"
+            " SOMETHING ELSE resize",
+            1,
+            Action::Resize
+        },
+        {
             "read",
-            " SOMETHING "
-            " SOMETHING ELSE",
+            " SOMETHING read"
+            " SOMETHING ELSE read",
             1,
             Action::Read
         },
@@ -331,6 +366,8 @@ void SetCalculator::readMaxOperations()
         try {
             m_ostr << "Please enter maximum number of operations: "; 
             max = readArguments(1)[0];
+
+            checkValidMaxOperation(max);
             setMaxOperations(max);
             break;
         }
@@ -349,11 +386,6 @@ void SetCalculator::readMaxOperations()
 
 void SetCalculator::setMaxOperations(int max)
 {
-    if (max > 100 || max < 3)
-    {
-        throw std::out_of_range("number must be between 3 and 100!\n");
-    } 
-
     m_maxOperations = max;
 }
 
@@ -431,6 +463,46 @@ int SetCalculator::readNumOfWords(std::string line)
     }
     m_ostr << "number of words in line: " << count << "\n";
     return count;
+}
+
+bool SetCalculator::checkToContinueRead() const
+{
+    std::string to_continue;
+
+    m_ostr << "\nWould you like to continue to "
+        "read the file? (Y - yes | N - no): ";
+    m_istr >> to_continue;
+
+    //Noga: check for "y" and "yes" and "YeS" and etc........
+    //Noga: this is how we do "Case-insensitive string comparison" mush
+    //convert string to upper case
+    std::for_each(to_continue.begin(), to_continue.end(), [](char& c) {
+        c = ::toupper(c);
+        });
+
+    return (to_continue == "Y" || to_continue == "YES");
+}
+
+void SetCalculator::checkValidMaxOperation(int max)
+{
+   if (max > 100 || max < 3)
+   {
+       throw std::out_of_range("number must be between 3 and 100!\n");
+   }
+   if (max < m_operations.size())
+   {
+       std::string answer;
+       m_ostr << "Would you like to delete the last" << (int(m_operations.size()) - max) << " operation? (Y - yes):\n";
+       m_istr >> answer;
+       if (answer == "Y" || answer == "yes")
+           m_operations.resize(m_operations.size() - (int(m_operations.size()) - max));
+   }
+}
+
+void SetCalculator::copyCalculatorData(SetCalculator& to, SetCalculator& from)
+{
+    to.m_operations = from.m_operations;
+    to.m_maxOperations = from.m_maxOperations;
 }
 
 
