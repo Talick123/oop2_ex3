@@ -22,13 +22,15 @@ SetCalculator::SetCalculator(std::istream& istr, std::ostream& ostr)
 {
 }
 
+//----------------------------------------------------------------------------------
+
 void SetCalculator::start()
 {
-    //TASK: ask user for max number of operations (check between 3 and 100) and takin
     readMaxOperations();
-    //m_istr.ignore(); //Tali: this line caused half the problems in my life (really only after adding readInt function) but still
     run();
 }
+
+//----------------------------------------------------------------------------------
 
 void SetCalculator::run()
 {
@@ -37,56 +39,63 @@ void SetCalculator::run()
         m_ostr << '\n';
         printOperations();
         m_ostr << "Enter command ('help' for the list of available commands): ";
-        //m_line.clear(); //TASK: try block for reading action
-        //readline();
-        /*
-            Tali: I think we should put both read and run in seperate function that catches all the 
-            throws that we define in lower layers
-            why: almost anytime something is not read write, loop needs to start again
-        */
-        const auto action = readAction();
-        runAction(action);
+        try {
+
+            const auto action = readAction();
+            runAction(action);
+        }
+        catch (std::istream::failure& error)
+        {
+            m_ostr << "invalid input\n";
+            //TODO: IF IN READING MODE, ASK IF TO CONTINUE
+        }
+        catch (std::invalid_argument& error)
+        {
+            m_ostr << error.what();
+        }
+
     } while (m_running && m_istr);
 }
 
+//----------------------------------------------------------------------------------
 
 
 void SetCalculator::read()
 {
     std::ifstream myfile;
-    std::string path;
-    m_ostr << "Please enter file path: ";
-
-    std::getline(m_istr, path);
-
-    //int numOfArguments = 0;
-    //const auto i = std::ranges::find(m_actions, Action::Read, &ActionDetails::action);
-
-    //std::vector<int> trypath = readArguments(i->numOfArguments);
-
-    //m_line << path;
-    myfile.open(path); //TASK: exception
-    //myfile.open(trypath.str());
-
-    if (!myfile)
-        m_ostr << "not file";
-
-    auto fileCalc = SetCalculator(myfile, m_ostr);
-
-    fileCalc.m_operations = this->m_operations;
-    fileCalc.m_maxOperations = this->m_maxOperations;
-
-    while (!myfile.eof())
+    std::string path = readString();
+ 
+    //std::getline(m_istr, path);
+    try
     {
-        fileCalc.run();
+        myfile = openfile(path);
+       // myfile.open(path); //TASK: exception
+
+        auto fileCalc = SetCalculator(myfile, m_ostr);
+
+        fileCalc.m_operations = this->m_operations;
+        fileCalc.m_maxOperations = this->m_maxOperations;
+
+        while (!myfile.eof()) //TODO: ADD myfile.m_running
+        {
+            fileCalc.run();
+        }
+
+        this->m_operations = fileCalc.m_operations;
+        this->m_maxOperations = fileCalc.m_maxOperations;
+
     }
-
-    this->m_operations = fileCalc.m_operations;
-    this->m_maxOperations = fileCalc.m_maxOperations;
-
+    catch (...)
+    {
+        m_ostr << "file error\n"; //TODO: create inheriting class for file not opening you know or path or whatever
+    }
+    myfile.close();
 }
 
+//----------------------------------------------------------------------------------
+
 //Tali if arguments are always returned as vectors, we would have to make sure that each place that recieves it is ok and doesnt yell at everyone
+// OLD FUNCTION
 //void SetCalculator::eval()
 //{
 //    if (auto index = readOperationIndex(); index) //R: init ; condition
@@ -102,6 +111,9 @@ void SetCalculator::read()
 //        m_ostr << " = " << operation->compute(inputs) << '\n';
 //    }
 //}
+
+//----------------------------------------------------------------------------------
+
 void SetCalculator::eval()
 {
     const auto i = std::ranges::find(m_actions, Action::Eval, &ActionDetails::action);
@@ -119,13 +131,24 @@ void SetCalculator::eval()
    
 }
 
+//----------------------------------------------------------------------------------
+
+//void SetCalculator::del()
+//{
+//    if (auto i = readOperationIndex(); i)
+//    {
+//        m_operations.erase(m_operations.begin() + *i);
+//    }
+//}
+
 void SetCalculator::del()
 {
-    if (auto i = readOperationIndex(); i)
-    {
-        m_operations.erase(m_operations.begin() + *i);
-    }
+    const auto i = std::ranges::find(m_actions, Action::Del, &ActionDetails::action);
+    auto index = getIndexes(i->numOfArguments)[0];
+
+    m_operations.erase(m_operations.begin() + index);
 }
+//----------------------------------------------------------------------------------
 
 void SetCalculator::help()
 {
@@ -137,11 +160,15 @@ void SetCalculator::help()
     m_ostr << '\n';
 }
 
+//----------------------------------------------------------------------------------
+
 void SetCalculator::exit()
 {
     m_ostr << "Goodbye!\n";
     m_running = false;
 }
+
+//----------------------------------------------------------------------------------
 
 void SetCalculator::printOperations() const
 {
@@ -157,17 +184,13 @@ void SetCalculator::printOperations() const
     m_ostr << "Maximum number of operations allowed: " << m_maxOperations << '\n';
 }
 
+//----------------------------------------------------------------------------------
+
+//OLD INDEX READER
 std::optional<int> SetCalculator::readOperationIndex() 
 {
     auto i = 0;
     m_istr >> i;
-    
-    //m_line >> i;
-
-    //auto i = readArguments(1);
-
-    //auto i = readInt();
-
 
     m_ostr << "readOperationIndex: i = " << i << "\n";
     if (i >= m_operations.size()) //TASK: add to exceptions
@@ -178,41 +201,35 @@ std::optional<int> SetCalculator::readOperationIndex()
     return i;
 }
 
+//----------------------------------------------------------------------------------
+
+//NEW INDEX READER
 std::vector<int> SetCalculator::getIndexes(int numOfArguments)
 {
     //have to add here that if its wrong to request again
     auto i = std::vector<int>();
-    try {
-        i = readArguments(numOfArguments);
-    }
-    catch (std::istream::failure error)
-    {
-        m_ostr << "invalid input\n";
-    }
-    catch (std::invalid_argument error)
-    {
-        m_ostr << error.what();
-    }
 
-    //m_ostr << "readOperationIndex: i = " << i[0] << "\n";
+     i = readArguments(numOfArguments);
+    
     for (auto index : i)
     {
         if (index >= m_operations.size()) //TASK: add to exceptions
         {
             //tali: add throw
-            m_ostr << "Operation #" << index << " doesn't exist\n";
-            return {};
+            throw std::invalid_argument("Operation does't exist");
+            //m_ostr << "Operation #" << index << " doesn't exist\n";
+            //return {};
         }
     }
     return i;
 }
+
+//----------------------------------------------------------------------------------
+
 SetCalculator::Action SetCalculator::readAction()
 {
     auto action = std::string();
     m_istr >> action;
-
-    //m_line >> action;
-    //m_ostr << "readACtion: action = " << action << "\n";
 
     const auto i = std::ranges::find(m_actions, action, &ActionDetails::command);
     if (i != m_actions.end())
@@ -222,6 +239,8 @@ SetCalculator::Action SetCalculator::readAction()
 
     return Action::Invalid;
 }
+
+//----------------------------------------------------------------------------------
 
 void SetCalculator::runAction(Action action)
 {
@@ -247,6 +266,8 @@ void SetCalculator::runAction(Action action)
         case Action::Exit:         exit();                     break;
     }
 }
+
+//----------------------------------------------------------------------------------
 
 SetCalculator::ActionMap SetCalculator::createActions()
 {
@@ -324,6 +345,8 @@ SetCalculator::ActionMap SetCalculator::createActions()
     };
 }
 
+//----------------------------------------------------------------------------------
+
 SetCalculator::OperationList SetCalculator::createOperations()
 {
     return OperationList
@@ -334,19 +357,18 @@ SetCalculator::OperationList SetCalculator::createOperations()
     };
 }
 
+//----------------------------------------------------------------------------------
+
 void SetCalculator::readMaxOperations()
 {
     int max;
-    //m_istr.exceptions(m_istr.failbit | m_istr.badbit);
-
-    //auto max = readArguments(1);
 
     while (true)
     {
         try {
             m_ostr << "Please enter maximum number of operations: ";
             //m_istr >> max;
-            max = readInt();
+            max = readInt(); //TODO: switch to read indexes function
             setMaxOperations(max);
             break;
         }
@@ -363,6 +385,8 @@ void SetCalculator::readMaxOperations()
     }
 }
 
+//----------------------------------------------------------------------------------
+
 void SetCalculator::setMaxOperations(int max)
 {
     if (max > 100 || max < 3)
@@ -373,10 +397,11 @@ void SetCalculator::setMaxOperations(int max)
     m_maxOperations = max;
 }
 
+//----------------------------------------------------------------------------------
+
+//ONLY USED IN readMaxOperation FUNCTION
 int SetCalculator::readInt()
-{
-    //m_istr.exceptions(m_istr.failbit | m_istr.badbit);
-    
+{   
     //Tali: tried soooo many different things, finally just used what i saw in another targil and it worked. i really tried to figure out why but couldnt :(
     std::string line;
     std::getline(m_istr, line);
@@ -391,34 +416,59 @@ int SetCalculator::readInt()
     return num;
 }
 
+//----------------------------------------------------------------------------------
+
+//TODO: read actions with this function
 std::string SetCalculator::readString()
 {
-    return std::string();
-}
-
-
-//void SetCalculator::readline()
-//{
-//    auto line = std::string();
-//    m_line.clear();
-//
-//    std::getline(m_istr, line);
-//   
-//    m_line.str(line);
-//}
-//
-std::vector<int> SetCalculator::readArguments(int numOfArguments)
-{
-    m_ostr << "num of arguments requested: " << numOfArguments << "\n";
     std::string line;
-    std::getline(m_istr, line);
-    m_ostr << "The line read is: " << line << "\n";
+    m_istr >> line;
     std::stringstream ss(line);
     ss.exceptions(ss.failbit | ss.badbit);
 
+    ss >> line;
+    m_ostr << "line is: " << line << "\n";
+    return line;
+}
+
+std::ifstream SetCalculator::openfile(std::string path) const
+{
+    std::ifstream myfile;
+
+    myfile.open(path); //TASK: exception
+
+    if (!myfile)
+        throw std::invalid_argument("cannot open file");
+
+    return myfile;
+
+}
+
+//----------------------------------------------------------------------------------
+
+
+//NEW function that reads int input (indexes)
+std::vector<int> SetCalculator::readArguments(int numOfArguments)
+{
+    //m_ostr << "num of arguments requested: " << numOfArguments << "\n";
+   // m_ostr << "The line read is: " << line << "\n";
+
     int arg;
     std::vector<int> arguments;
-    int count = numOfArguments;
+
+    std::string line;
+    std::getline(m_istr, line);
+    std::stringstream ss(line);
+    ss.exceptions(ss.failbit | ss.badbit);
+
+    int count = readNumOfWords(line);
+    //check number of words given 
+    //if not == num of arguments
+    //throw
+    
+    if (count != numOfArguments)
+        throw std::invalid_argument("Incorrect number of arguments!\n");
+
     while (count > 0)
     {
         ss >> arg;
@@ -427,9 +477,30 @@ std::vector<int> SetCalculator::readArguments(int numOfArguments)
         arguments.push_back(arg);
         count--;
     }
+    //TODO: add throw for when there are too many arguments
 
-    if(arguments.size() != numOfArguments)
-        throw std::invalid_argument("Wrong number of arguments");
+    //if(arguments.size() != numOfArguments)
+    //    throw std::invalid_argument("Wrong number of arguments");
 
     return arguments;
 }
+
+//----------------------------------------------------------------------------------
+
+
+int SetCalculator::readNumOfWords(std::string line)
+{
+    auto count = 0;
+    std::string word;
+    std::stringstream temp(line);
+    //temp.exceptions(temp.failbit | temp.badbit);
+
+    while (temp >> word)
+    {
+        count++;
+    }
+    m_ostr << "number of words in line: " << count << "\n";
+    return count;
+}
+
+

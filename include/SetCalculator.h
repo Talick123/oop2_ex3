@@ -80,14 +80,12 @@ private:
     int m_maxOperations;
     void readMaxOperations();
     void setMaxOperations(int max);
-    //void readline(); //maybe delete
     std::vector<int> readArguments(int numOfArguments);
 
     int readInt();
     std::string readString();
 
+    std::ifstream openfile(std::string path) const;
 
-
-    //std::stringstream m_line;
-
+    int readNumOfWords(std::string line);
 };
