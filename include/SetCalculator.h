@@ -86,4 +86,6 @@ private:
     std::ifstream openfile(std::string path) const;
 
     int readNumOfWords(std::string line);
+
+    bool m_fileMode = false;
 };

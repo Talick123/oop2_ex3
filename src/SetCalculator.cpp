@@ -6,6 +6,7 @@
 #include "Product.h"
 #include "Comp.h"
 #include "Identity.h"
+#include "Exceptions.h"
 
 #include <istream>
 #include <ostream>
@@ -78,19 +79,24 @@ void SetCalculator::read()
 
         fileCalc.m_operations = this->m_operations;
         fileCalc.m_maxOperations = this->m_maxOperations;
+        
+        m_fileMode = true;
 
-        while (!myfile.eof()) //TODO: ADD myfile.m_running
+        while (!myfile.eof() && fileCalc.m_running) //TODO: ADD myfile.m_running
         {
             fileCalc.run();
         }
+
+        m_fileMode = false;
+
 
         this->m_operations = fileCalc.m_operations;
         this->m_maxOperations = fileCalc.m_maxOperations;
 
     }
-    catch (...)
+    catch (InvalidPath &error)
     {
-        m_ostr << "file error\n"; //TODO: create inheriting class for file not opening you know or path or whatever
+        m_ostr << error.what();
     }
     myfile.close();
 }
@@ -375,7 +381,7 @@ std::ifstream SetCalculator::openfile(std::string path) const
     myfile.open(path);
 
     if (!myfile)
-        throw std::invalid_argument("cannot open file");
+        throw InvalidPath();
 
     return myfile;
 
