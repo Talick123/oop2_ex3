@@ -28,6 +28,9 @@ private:
     template <typename FuncType>
     void binaryFunc()
     {
+        if (m_operations.size() >= max)
+            throw std::out_of_range("You've reached the max number of operations!\n");
+
         auto indexes = getIndexes(2);
         
         m_operations.push_back(std::make_shared<FuncType>(m_operations[indexes[0]], m_operations[indexes[1]]));
