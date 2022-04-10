@@ -28,10 +28,10 @@ private:
     template <typename FuncType>
     void binaryFunc()
     {
-        if (auto f0 = readOperationIndex(), f1 = readOperationIndex(); f0 && f1)
-        {
-            m_operations.push_back(std::make_shared<FuncType>(m_operations[*f0], m_operations[*f1]));
-        }
+        auto indexes = getIndexes(2);
+        
+        m_operations.push_back(std::make_shared<FuncType>(m_operations[indexes[0]], m_operations[indexes[1]]));
+
     }
 
     void printOperations() const;
@@ -68,7 +68,6 @@ private:
     std::istream& m_istr;
     std::ostream& m_ostr;
 
-    std::optional<int> readOperationIndex();
     std::vector<int> getIndexes(int numOfArguments);
     Action readAction();
     void runAction(Action action);
@@ -82,7 +81,6 @@ private:
     void setMaxOperations(int max);
     std::vector<int> readArguments(int numOfArguments);
 
-    int readInt();
     std::string readString();
 
     std::ifstream openfile(std::string path) const;
