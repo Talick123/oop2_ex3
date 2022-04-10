@@ -435,7 +435,7 @@ std::ifstream SetCalculator::openfile(std::string path) const
 {
     std::ifstream myfile;
 
-    myfile.open(path); //TASK: exception
+    myfile.open(path);
 
     if (!myfile)
         throw std::invalid_argument("cannot open file");
@@ -446,13 +446,9 @@ std::ifstream SetCalculator::openfile(std::string path) const
 
 //----------------------------------------------------------------------------------
 
-
 //NEW function that reads int input (indexes)
 std::vector<int> SetCalculator::readArguments(int numOfArguments)
 {
-    //m_ostr << "num of arguments requested: " << numOfArguments << "\n";
-   // m_ostr << "The line read is: " << line << "\n";
-
     int arg;
     std::vector<int> arguments;
 
@@ -462,9 +458,6 @@ std::vector<int> SetCalculator::readArguments(int numOfArguments)
     ss.exceptions(ss.failbit | ss.badbit);
 
     int count = readNumOfWords(line);
-    //check number of words given 
-    //if not == num of arguments
-    //throw
     
     if (count != numOfArguments)
         throw std::invalid_argument("Incorrect number of arguments!\n");
@@ -477,11 +470,6 @@ std::vector<int> SetCalculator::readArguments(int numOfArguments)
         arguments.push_back(arg);
         count--;
     }
-    //TODO: add throw for when there are too many arguments
-
-    //if(arguments.size() != numOfArguments)
-    //    throw std::invalid_argument("Wrong number of arguments");
-
     return arguments;
 }
 
@@ -493,7 +481,6 @@ int SetCalculator::readNumOfWords(std::string line)
     auto count = 0;
     std::string word;
     std::stringstream temp(line);
-    //temp.exceptions(temp.failbit | temp.badbit);
 
     while (temp >> word)
     {
