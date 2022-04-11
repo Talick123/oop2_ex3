@@ -43,8 +43,8 @@ Design:
         - generates set names, A-Z
 
 Files:
-    - SetCalculator.h/SetCalculator.cpp: contains class SetCalculator
-    - Set.h/Set.cpp: contains class Set
+    - SetCalculator.h/SetCalculator.cpp: contains class SetCalculator (changed from original)
+    - Set.h/Set.cpp: contains class Set 
     - Operation.h/Opertation.cpp: contains base class Operation
     - BinaryOperation.h/BinaryOperation.cpp: contains class BinaryOperation
     - NonCompBinaryOperation.h/NonCompBinaryOperation.cpp: contains class NonCompBinaryOperation
@@ -54,8 +54,8 @@ Files:
     - Intersection.h/Intersection.cpp: contains class Intersection
     - Product.h/Product.cpp: contains class Product (multiplies the sets)
     - Comp.h/Comp.cpp: contains class Comp
-    - Exceptions.h/Exceptions.cpp: contains class Exceptions
-    - NameGenerator.h/NameGenerator.cpp: contains class NameGenerator
+    - Exceptions.h/Exceptions.cpp: contains class Exceptions (new files)
+    - NameGenerator.h/NameGenerator.cpp: contains class NameGenerator (changed from original)
 
 Main Data Structures and their Jobs:
     - vector of shared_ptr of class Operations that contains all the operations
@@ -83,8 +83,13 @@ Other General Notes:
         set calculator we began with (not reading from file)
     - all commands are written in the same line as the values of the operations
     - after the eval command, the sets required will be represented all in the
-        following line together
+        following line together. 
+        For example: 
+        eval 0
+        2 1 2 3 4 1 2
+        (two sets first size 2, second size 3)
     - the program will read a line in its entirety, if within the line not all arguments
         are present, the program will let the user know and request the user to input again
         (if in file, will ask if user wants to continue reading)
-
+    - read command supported while reading from file
+    - first reads command then, if valid, read the rest of the line
