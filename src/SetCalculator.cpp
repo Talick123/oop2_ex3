@@ -68,11 +68,12 @@ void SetCalculator::run()
 
 //----------------------------------------------------------------------------------
 
-
 void SetCalculator::resize()
 {
     readMaxOperations();
 }
+
+//----------------------------------------------------------------------------------
 
 void SetCalculator::read()
 {
@@ -82,15 +83,12 @@ void SetCalculator::read()
     try
     {
         myfile = openfile(path);
-
         auto fileCalc = SetCalculator(myfile, m_ostr);
 
         copyCalculatorData(fileCalc, *this);
         
-        
         fileCalc.m_fileMode = true;
-
-        while (!myfile.eof() && fileCalc.m_running) //TODO: ADD myfile.m_running
+        while (!myfile.eof() && fileCalc.m_running)
         {
             try
             {
@@ -98,10 +96,6 @@ void SetCalculator::read()
             }
             catch (...)
             {
-                /*std::string line;
-                myfile.seekg(0);
-                std::getline(myfile, line);*/
-                //printCurrFileLine();
                 int counter = 0;
                 std::string currLine;
                 myfile.seekg(0);
@@ -113,24 +107,14 @@ void SetCalculator::read()
 
                 std::getline(myfile, currLine);
                 m_ostr << "\nError at line: " << currLine << "\n";
-                //noga: no. always print the first line in file
-                //m_ostr << "\nThe problem was this line: " << line << "\n";
-                //Noga: i think to move this ugly part to different function
-                //Noga: now I think that its stupid to make function that we need to use only in file mode so I dont Know
-                //Noga: eventually i moved it to new function but i dont know ok. ok
+            
                 if (checkToContinueRead())
                     continue;
                 else
                     break;
-                
             }
         }
-
-        //fileCalc.m_fileMode = false;
-
         copyCalculatorData(*this, fileCalc);
-
-
     }
     catch (InvalidPath &error)
     {
@@ -155,14 +139,15 @@ void SetCalculator::eval()
     for (auto i = 0; i < operation->inputCount(); ++i)
     {
         inputs.push_back(Set(sets[i]));
-        //inputs.push_back(Set(m_istr));
-        //if (m_fileMode) m_lineNum++;
+        if (m_fileMode) m_lineNum++;
     }
     
     operation->print(m_ostr, inputs);
     m_ostr << " = " << operation->compute(inputs) << '\n';
    
 }
+
+//----------------------------------------------------------------------------------
 
 std::vector<std::vector<int>> SetCalculator::getSets(int numOfSets)
 {
@@ -192,7 +177,6 @@ std::vector<std::vector<int>> SetCalculator::getSets(int numOfSets)
             throw std::out_of_range("Not enough values!\n");
 
         int tempsize = size;
-        m_ostr << "temp size is: " << tempsize << "\n";
         while (tempsize > 0)
         {
             ss >> num;
@@ -203,11 +187,11 @@ std::vector<std::vector<int>> SetCalculator::getSets(int numOfSets)
         singleset.clear();
         valuesLeft -= size;
     }
+    if(valuesLeft > 0)
+        throw std::out_of_range("Too many values!\n");
 
     return sets;
 }
-
-
 
 //----------------------------------------------------------------------------------
 
@@ -254,19 +238,17 @@ void SetCalculator::printOperations() const
     m_ostr << "Maximum number of operations allowed: " << m_maxOperations << '\n';
 }
 
-
 //----------------------------------------------------------------------------------
 
-//NEW INDEX READER
 std::vector<int> SetCalculator::getIndexes(int numOfArguments)
 {
-    auto i = std::vector<int>();
+    auto opIndexes = std::vector<int>();
 
-    i = readArguments(numOfArguments);
+    opIndexes = readArguments(numOfArguments);
     
-    for (auto index : i)
+    for (auto index : opIndexes)
     {
-        if (index >= m_operations.size() || index < 0) //TASK: add to exceptions and add if smaller than 0
+        if (index >= m_operations.size() || index < 0)
         {
             std::string error_msg = "Operation ";
             error_msg = error_msg + std::to_string(index);
@@ -274,7 +256,7 @@ std::vector<int> SetCalculator::getIndexes(int numOfArguments)
             throw std::out_of_range(error_msg);
         }
     }
-    return i;
+    return opIndexes;
 }
 
 //----------------------------------------------------------------------------------
@@ -283,10 +265,10 @@ SetCalculator::Action SetCalculator::readAction()
 {
     auto action = readString();
 
-    const auto i = std::ranges::find(m_actions, action, &ActionDetails::command);
-    if (i != m_actions.end())
+    const auto command = std::ranges::find(m_actions, action, &ActionDetails::command);
+    if (command != m_actions.end())
     {
-        return i->action;
+        return command->action;
     }
 
     return Action::Invalid;
@@ -324,21 +306,17 @@ void SetCalculator::runAction(Action action)
 
 SetCalculator::ActionMap SetCalculator::createActions()
 {
-    //Noga: something something?
     return ActionMap
     {
-        //TASK: add here: 'read' 'resize'
         {
             "resize",
-            " SOMETHING resize"
-            " SOMETHING ELSE resize",
+            " user can change number of max operations allowed ",
             1,
             Action::Resize
         },
         {
             "read",
-            " SOMETHING read"
-            " SOMETHING ELSE read",
+            " path ... - opens file given and reads commands to execute line by line",
             1,
             Action::Read
         },
@@ -454,7 +432,6 @@ void SetCalculator::setMaxOperations(int max)
 
 //----------------------------------------------------------------------------------
 
-//TODO: read actions with this function
 std::string SetCalculator::readString()
 {
     std::string line;
@@ -463,7 +440,6 @@ std::string SetCalculator::readString()
     ss.exceptions(ss.failbit | ss.badbit);
 
     ss >> line;
-    m_ostr << "line is: " << line << "\n";
     return line;
 }
 
@@ -484,7 +460,6 @@ std::ifstream SetCalculator::openfile(std::string path) const
 
 //----------------------------------------------------------------------------------
 
-//NEW function that reads int input (indexes)
 std::vector<int> SetCalculator::readArguments(int numOfArguments)
 {
     int arg;
@@ -503,7 +478,6 @@ std::vector<int> SetCalculator::readArguments(int numOfArguments)
     while (count > 0)
     {
         ss >> arg;
-        m_ostr << "The index is: " << arg << "\n";
 
         arguments.push_back(arg);
         count--;
@@ -513,8 +487,7 @@ std::vector<int> SetCalculator::readArguments(int numOfArguments)
 
 //----------------------------------------------------------------------------------
 
-
-int SetCalculator::readNumOfWords(std::string line)
+int SetCalculator::readNumOfWords(std::string line) const
 {
     auto count = 0;
     std::string word;
@@ -524,9 +497,10 @@ int SetCalculator::readNumOfWords(std::string line)
     {
         count++;
     }
-    m_ostr << "number of words in line: " << count << "\n";
     return count;
 }
+
+//----------------------------------------------------------------------------------
 
 bool SetCalculator::checkToContinueRead() const
 {
@@ -536,8 +510,6 @@ bool SetCalculator::checkToContinueRead() const
         "read the file? (Y - yes | N - no): ";
     m_istr >> to_continue;
 
-    //Noga: check for "y" and "yes" and "YeS" and etc........
-    //Noga: this is how we do "Case-insensitive string comparison" mush
     //convert string to upper case
     std::for_each(to_continue.begin(), to_continue.end(), [](char& c) {
         c = ::toupper(c);
@@ -545,6 +517,8 @@ bool SetCalculator::checkToContinueRead() const
 
     return (to_continue == "Y" || to_continue == "YES");
 }
+
+//----------------------------------------------------------------------------------
 
 void SetCalculator::checkValidMaxOperation(int max)
 {
@@ -561,6 +535,8 @@ void SetCalculator::checkValidMaxOperation(int max)
            m_operations.resize(m_operations.size() - (int(m_operations.size()) - max));
    }
 }
+
+//----------------------------------------------------------------------------------
 
 void SetCalculator::copyCalculatorData(SetCalculator& to, SetCalculator& from)
 {

@@ -4,6 +4,5 @@
 
 int main()
 {
-    //SetCalculator(std::cin, std::cout).run();
     SetCalculator(std::cin, std::cout).start();
 }

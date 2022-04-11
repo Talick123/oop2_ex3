@@ -17,5 +17,3 @@ public:
 private:
     char m_current = FIRST;
 };
-
-//TODO: make better

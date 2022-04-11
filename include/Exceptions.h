@@ -1,17 +1,5 @@
 #pragma once
 
-//Noga: not in use
-class FileError :public std::exception
-{
-public:
-	FileError() {}
-	~FileError() {}
-	/*const char* what() const noexcept {
-		return "\nError at line: ";
-	}*/
-};
-
-
 class InvalidPath :public std::exception
 {
 public:
