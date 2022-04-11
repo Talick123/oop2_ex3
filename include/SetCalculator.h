@@ -30,8 +30,8 @@ private:
     void binaryFunc()
     {
        //Noga: I dont know why this is here. 
-       /* if (m_operations.size() >= max)
-            throw std::out_of_range("You've reached the max number of operations!\n");*/
+        if (m_operations.size() >= m_maxOperations)
+            throw std::invalid_argument("You've reached the max number of operations!\n");
 
         auto indexes = getIndexes(2);
         
