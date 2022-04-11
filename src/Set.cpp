@@ -15,6 +15,7 @@ Set::Set(std::istream& istr)
         istr >> num;
         m_items.push_back(num);
     }
+
     makeSet();
 }
 

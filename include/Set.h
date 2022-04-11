@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <iosfwd>
+#include <sstream>
+
 
 // Represents a (mathematical) set of integers or tuple of integers
 class Set

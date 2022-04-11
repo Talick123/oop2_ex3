@@ -99,4 +99,6 @@ private:
     bool checkToContinueRead()const;
     void checkValidMaxOperation(int max);
     void copyCalculatorData(SetCalculator &to, SetCalculator& from);
+
+    std::vector<std::vector<int>> getSets(int numOfSets);
 };

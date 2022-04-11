@@ -149,9 +149,13 @@ void SetCalculator::eval()
 
     const auto& operation = m_operations[index];
     auto inputs = std::vector<Set>();
+
+    std::vector<std::vector<int>> sets = getSets(operation->inputCount());
+
     for (auto i = 0; i < operation->inputCount(); ++i)
     {
-        inputs.push_back(Set(m_istr));
+        inputs.push_back(Set(sets[i]));
+        //inputs.push_back(Set(m_istr));
         //if (m_fileMode) m_lineNum++;
     }
     
@@ -159,6 +163,51 @@ void SetCalculator::eval()
     m_ostr << " = " << operation->compute(inputs) << '\n';
    
 }
+
+std::vector<std::vector<int>> SetCalculator::getSets(int numOfSets)
+{
+    int size, numOfValues, num;
+    std::string line;
+    std::getline(m_istr, line);
+    std::stringstream ss(line);
+    ss.exceptions(ss.failbit | ss.badbit);
+    std::vector<std::vector<int>> sets;
+    std::vector<int> singleset;
+
+    numOfValues = readNumOfWords(line);
+
+    if(numOfValues <= numOfSets)
+        throw std::out_of_range("Not enough values!\n");
+
+    int valuesLeft = numOfValues;
+    for (auto i = 0; i < numOfSets; i++)
+    {
+        if(valuesLeft <= 1)
+            throw std::out_of_range("Not enough values!\n");
+
+        ss >> size;
+        --valuesLeft;
+
+        if (size > valuesLeft)
+            throw std::out_of_range("Not enough values!\n");
+
+        int tempsize = size;
+        m_ostr << "temp size is: " << tempsize << "\n";
+        while (tempsize > 0)
+        {
+            ss >> num;
+            singleset.push_back(num);
+            --tempsize;
+        }
+        sets.push_back(singleset);
+        singleset.clear();
+        valuesLeft -= size;
+    }
+
+    return sets;
+}
+
+
 
 //----------------------------------------------------------------------------------
 
@@ -217,7 +266,7 @@ std::vector<int> SetCalculator::getIndexes(int numOfArguments)
     
     for (auto index : i)
     {
-        if (index >= m_operations.size()) //TASK: add to exceptions and add if smaller than 0
+        if (index >= m_operations.size() || index < 0) //TASK: add to exceptions and add if smaller than 0
         {
             std::string error_msg = "Operation ";
             error_msg = error_msg + std::to_string(index);
