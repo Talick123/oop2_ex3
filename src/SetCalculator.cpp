@@ -324,6 +324,7 @@ void SetCalculator::runAction(Action action)
 
 SetCalculator::ActionMap SetCalculator::createActions()
 {
+    //Noga: something something?
     return ActionMap
     {
         //TASK: add here: 'read' 'resize'

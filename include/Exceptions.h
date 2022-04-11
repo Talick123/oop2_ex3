@@ -1,5 +1,6 @@
 #pragma once
 
+//Noga: not in use
 class FileError :public std::exception
 {
 public:

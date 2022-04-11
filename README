@@ -12,6 +12,7 @@ General Description of the Assignment:
 
 
     //Tali: the only file we added is Exceptions.h, other than that all is the same
+    //Noga: I think we need to write THEIR readme - they have different classes
 Design:
     Classes: SetCalculator, Operation, CompOperation, Union, Intersection, Difference,
     Product, Composite, Sets, Identity
