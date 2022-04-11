@@ -1,0 +1,75 @@
+﻿OOP2 ex3 - Set Calculator Exceptions
+
+Written by: Tali Kalev (טלי כלב), ID:208629691
+            Noga Levy (נוגה לוי), ID:315260927
+
+General Description of the Assignment:
+    In this assignment we were asked to implement a programable calculator for
+    sets. The calculator starts with 3 basic operations on sets; Union,
+    Intersection and Difference. The user may use the program to calculate
+    different operations on sets from the list of operations as well as add new
+    operations using the available commands.
+
+Design:
+    Classes: Calculator, Operation, CompOperation, Union, Intersection, Difference,
+    Product, Composite, Sets, Identity
+
+    Calculator:
+        - responsible for dealing with input of commands and holding/executing
+         all the available operations
+    Operation:
+        - base class for CompOperation and Identity
+    CompOperation:
+        - base class for all basic operations, deals with compound operations
+        created using one of the basic operations (union, intersection etc)
+    Identity:
+        - class that acts as the "leaf" of our binary search tree, returns
+        the set needed in the calculation of the operation calling it
+        - inherits from Operation
+    Union, Intersection, Difference, Product, Composite:
+        - all are classes that inherit from CompOperation and take the outcomes
+        of the 2 Operations received and executes on them the required operation
+    Sets:
+        - class that deals with the data structure that is the sets received and
+        printed, makes sure to remove multiple occurrences of digits as well as
+        sorts the set
+
+    Overall: The Operation class acts as a root of the binary search tree built
+    from compound operations that then branch off eventually to basic operations
+    and then identity. It is built in a way such that a pass on the tree "in order"
+    produces that required operation.
+
+Files:
+    - Calculator.h/Calculator.cpp: contains class Calculator
+    - Set.h/Set.cpp: contains class Set
+    - Operation.h/Opertation.cpp: contains base class Operation
+    - CompOperation.h/CompOperation.cpp: contains class CompOperation
+    - Union.h/Union.cpp: contains class Union
+    - Difference.h/Difference.cpp: contains class Difference
+    - Intersection.h/Intersection.cpp: contains class Intersection
+    - Product.h/Product.cpp: contains class Product (multiplies the sets)
+    - Composite.h/Composite.cpp: contains class Composite
+    - utilities.h: contains constant variables
+    - PrintUtilities.h/PrintUtilities.cpp: contains function to print colored text
+
+Main Data Structures and their Jobs:
+    - vector of shared_ptr of class Operations that contains all the operations
+    in the calculator available for the user
+    - binary search tree described in the Design above
+    - all other main data structures and their jobs: see Design above
+
+
+Notable Algorithms:
+    - the following algorithms were used from the <algorithm> library:
+        - std::ranges::set_union
+        - std::ranges::set_intersection
+        - std::ranges::set_difference
+        - std::ranges::unique
+        - std::ranges::sort
+    - access to the data in the binary search tree of operations is done in order
+
+Known Bugs:
+    - no known bugs
+
+Other General Notes:
+    - no other notes
