@@ -94,6 +94,7 @@ private:
     int readNumOfWords(std::string line);
 
     bool m_fileMode = false;
+    int m_lineNum = -1;
 
     bool checkToContinueRead()const;
     void checkValidMaxOperation(int max);

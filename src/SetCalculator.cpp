@@ -40,6 +40,7 @@ void SetCalculator::run()
         m_ostr << '\n';
         printOperations();
         m_ostr << "Enter command ('help' for the list of available commands): ";
+        if (m_fileMode) m_lineNum++;
         try 
         {
             const auto action = readAction();
@@ -100,7 +101,18 @@ void SetCalculator::read()
                 /*std::string line;
                 myfile.seekg(0);
                 std::getline(myfile, line);*/
+                //printCurrFileLine();
+                int counter = 0;
+                std::string currLine;
+                myfile.seekg(0);
+                while (fileCalc.m_lineNum > counter)
+                {
+                    myfile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                    counter++;
+                }
 
+                std::getline(myfile, currLine);
+                m_ostr << "\nError at line: " << currLine << "\n";
                 //noga: no. always print the first line in file
                 //m_ostr << "\nThe problem was this line: " << line << "\n";
                 //Noga: i think to move this ugly part to different function
@@ -140,6 +152,7 @@ void SetCalculator::eval()
     for (auto i = 0; i < operation->inputCount(); ++i)
     {
         inputs.push_back(Set(m_istr));
+        //if (m_fileMode) m_lineNum++;
     }
     
     operation->print(m_ostr, inputs);
